@@ -4,6 +4,7 @@ data/output
 data/video
 data/yolov8_models
 data/tracks
+data/input
 
 
 yolov8
