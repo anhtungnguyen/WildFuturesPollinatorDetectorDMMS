@@ -168,14 +168,14 @@ class TrackingMethods(KalmanFilter, ExtendedKalmanFilter):
                                 video_filepath: str,
                                 info_filename: str) -> tuple:
                 
-        if info_filename == '': info_filename = None
+        # if info_filename == '': info_filename = None
 
-        if info_filename is not None:
+        if info_filename != '': #is not None:
             compression_details_file = os.path.join(video_filepath, os.path.splitext(info_filename)[0])
         else:
             compression_details_file = os.path.splitext(video_filepath)[0] +'_video_info.csv'
 
-
+        # print(compression_details_file)
         with open(compression_details_file, "r", encoding="utf-8") as csv_file:
             csv_reader = csv.reader(csv_file)
 
@@ -186,6 +186,11 @@ class TrackingMethods(KalmanFilter, ExtendedKalmanFilter):
             next(csv_reader)  # Skip the first row
 
             for row in csv_reader:
+                # DMMS: If any rows in the scv are empty, skip them or it will throw an error.
+                # print(len(row))
+                if len(row) == 0:
+                    continue
+
                 video_frame_number_list.append(int(row[0]))
                 actual_frame_number_list.append(int(row[1]))
                 if row[2] != '':

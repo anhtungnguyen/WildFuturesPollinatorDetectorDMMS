@@ -151,12 +151,23 @@ class TracknRecord():
         while True:
             _, frame = self.vid.read()
 
+            skip = 10 # dmms: skip every n frames. Note that max_interframe_travel should be changed as well for high skip numbers.
+
+
             if frame is not None:
                 nframe += 1
+                # dmms: implement the skip for every other frame.
+                if ((nframe % skip) != 0):
+                    continue
+
                 mapped_frame_num = self.TrackInsects.map_frame_number(nframe, compressed_video)
                 fgbg_associated_detections, dl_associated_detections, missing_insects, new_insects = self.TrackInsects.run_tracker(frame, nframe, predicted_position)
                 for_predictions = self.RecordTracks.record_track(frame, nframe, mapped_frame_num,fgbg_associated_detections, dl_associated_detections, missing_insects, new_insects)
                 predicted_position = self.TrackInsects.predict_next(for_predictions)
+
+                # print(nframe)
+                # print(self.flower_detection_interval) # Comes out as None if flower detection is off.
+                # print(nframe % self.flower_detection_interval == 0)
 
                 if ((self.compressed_video and (nframe in self.full_frame_numbers)) or (not self.compressed_video and (nframe == 5 or nframe % self.flower_detection_interval == 0))) and self.TrackFlowers is not None:
                     associated_flower_detections, missing_flowers, new_flower_detections = self.TrackFlowers.run_flower_tracker(frame, flower_predictions)
@@ -289,7 +300,7 @@ def main(config: Config):
         TrackInsects = track_insects,
         TrackFlowers = track_flowers if config.track_flowers else None,
         RecordFlowers = record_flowers if config.track_flowers else None,
-        flower_detection_interval = config.flower_detection_interval if config.track_flowers else None,
+        flower_detection_interval = config.flower_detection_interval, #if config.track_flowers else None, # dmms: Fix for flower detection off.
         compressed_video = config.compressed_video,
         info_filename = config.info_filename)
     
