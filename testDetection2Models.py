@@ -54,9 +54,9 @@ out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'MP4V'), int(cap.g
 
 
 model = YOLO(weights_path)
-verification_model = YOLO(verify_weights_paths)
+verify_model = YOLO(verify_weights_paths)
 
-dl_detection_confidence = 0.5
+dl_detection_confidence = 0.2
 verification_confidence = 0.5
 insect_iou_threshold = 0
 tracking_insect_classes = [0]
@@ -66,49 +66,44 @@ detection_counts = []  # List to store frame number and detection count
 while ret:
     frame_count += 1
 
-    # results = model(frame)[0]
+    results = model(frame)[0]
 
     # Use the predict method with custom parameters
-    results = model.predict(
-        source=frame,
-        conf=dl_detection_confidence,
-        show=False,
-        verbose=False,
-        save=False,
-        imgsz=(864, 480),
-        iou=insect_iou_threshold,
-        classes=tracking_insect_classes
-    )
+    # results = model.predict(
+    #     source=frame,
+    #     conf=dl_detection_confidence,
+    #     show=False,
+    #     verbose=False,
+    #     save=False,
+    #     imgsz=(864, 480),
+    #     iou=insect_iou_threshold,
+    #     classes=tracking_insect_classes
+    # )
 
-    detections = _decode_DL_results(results)
-    processed_detections = __calculate_cog(detections)
+    # detections = _decode_DL_results(results)
+    # processed_detections = __calculate_cog(detections)
 
     detection_count = 0  # Counter for the number of detections in the current frame
 
-    # for result in results.boxes.data.tolist():
-    #     x1, y1, x2, y2, score, class_id = result
+    for result in results.boxes.data.tolist():
+        x1, y1, x2, y2, score, class_id = result
 
-    #     if score > dl_detection_confidence:
-    #         detection_count += 1
-    #         cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
-    #         cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
-    #                     cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
-
-    for detection in processed_detections:
-        mid_x, mid_y, area, class_id, confidence = detection
-
-        if confidence > dl_detection_confidence:
+        if score > dl_detection_confidence:
             # detection_count += 1
-            
+
+            # Calculate the center of the bounding box
+            mid_x = int((x1 + x2) / 2)
+            mid_y = int((y1 + y2) / 2)
+
             # Crop the image for verification
             frame_width = frame.shape[1]
             frame_height = frame.shape[0]
-            x0 = max(0, int(mid_x - 160))
-            y0 = max(0, int(mid_y - 160))
-            x1 = min(int(mid_x + 160), frame_width)
-            y1 = min(int(mid_y + 160), frame_height)
+            x0_ = max(0, int(mid_x - 160))
+            y0_ = max(0, int(mid_y - 160))
+            x1_ = min(int(mid_x + 160), frame_width)
+            y1_ = min(int(mid_y + 160), frame_height)
 
-            cropped_frame = frame[y0:y1, x0:x1]
+            cropped_frame = frame[y0_:y1_, x0_:x1_] 
 
             # Create a black frame and place the cropped frame in the center
             black_frame = np.zeros((640, 640, 3), np.uint8)
@@ -117,33 +112,56 @@ while ret:
             # Flip the cropped frame (as per your original instructions)
             crop = cv2.flip(black_frame, -1)
 
-            # Run the second model on the cropped frame
-            verification_results = verification_model.predict(
-                source=crop,
-                conf=verification_confidence,
-                show=False,
-                verbose=False,
-                iou=0,
-                classes=[0],
-                augment=True,
-                imgsz=(640, 640)
-            )
+            # Run the second model on the cropped frame for verification
+            verification_results = verify_model(crop)[0]
+            for verified_result in verification_results.boxes.data.tolist():
+                x_1,y_1,x_2,y_2,score_,class_id_ = verified_result
 
-            if len(verification_results[0].boxes) > 0:
-            # If the second model verifies the detection, annotate it
-                detection_count += 1
-                # Draw the bounding box (using decoded results)
-                x1 = int(mid_x - (area ** 0.5) / 2)
-                y1 = int(mid_y - (area ** 0.5) / 2)
-                x2 = int(mid_x + (area ** 0.5) / 2)
-                y2 = int(mid_y + (area ** 0.5) / 2)
+                if score_ > verification_confidence:
+                    detection_count += 1
+                    cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
+                    cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+                    break
+
+            # verification_results = verify_model.predict(
+            #     source=crop,
+            #     conf=verification_confidence,
+            #     show=False,
+            #     verbose=False,
+            #     iou=0,
+            #     classes=[0],
+            #     augment=True,
+            #     imgsz=(640, 640)
+            # )
+
+            # if len(verification_results[0].boxes) > 0:
+            #     detection_count += 1
+            #     cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
+            #     cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
+            #                 cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+
+    # for detection in processed_detections:
+    #     mid_x, mid_y, area, class_id, confidence = detection
+
+    #     if confidence > dl_detection_confidence:
+    #         detection_count += 1
             
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 4)  # Green rectangle
+    #         # Draw a circle at the center of the bounding box (CoG)
+    #         # cv2.circle(frame, (int(mid_x), int(mid_y)), 5, (0, 0, 255), -1)  # Red dot for the center
 
-                # Annotate the class name and confidence on the frame
-                label = f"{model.names[int(class_id)].upper()}"
-                # label = f"{model.names[int(class_id)].upper()} {confidence:.2f}"
-                cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+    #         # Draw the bounding box (using decoded results)
+    #         x1 = int(mid_x - (area ** 0.5) / 2)
+    #         y1 = int(mid_y - (area ** 0.5) / 2)
+    #         x2 = int(mid_x + (area ** 0.5) / 2)
+    #         y2 = int(mid_y + (area ** 0.5) / 2)
+            
+    #         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 4)  # Green rectangle
+
+    #         # Annotate the class name and confidence on the frame
+    #         label = f"{model.names[int(class_id)].upper()}"
+    #         # label = f"{model.names[int(class_id)].upper()} {confidence:.2f}"
+    #         cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
 
     # Append the frame number and detection count to the list
     detection_counts.append([frame_count, detection_count])
