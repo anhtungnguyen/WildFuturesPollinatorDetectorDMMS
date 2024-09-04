@@ -38,12 +38,12 @@ def __calculate_cog(_results: np.ndarray) -> np.ndarray:
 
     return _insect_detection
 
-weights_path = './data/yolov8_models/insects_best_s.pt'
-verify_weights_paths = './data/yolov8_models/insects_best_l.pt'
+weights_path = '../data/yolov8_models/insects_best_s.pt'
+verify_weights_paths = '../data/yolov8_models/insects_best_l.pt'
 
-video_path = './data/input/20191123_131057.mp4'
-video_path_out = './data/output/20191123_131057_out.mp4'
-csv_output_path = './data/output/20191123_131057_detection_counts.csv'  # CSV file path for output
+video_path = '../data/input/20191123_131057.mp4'
+video_path_out = '../data/output/20191123_131057_out.mp4'
+csv_output_path = '../data/output/20191123_131057_detection_counts.csv'  # CSV file path for output
 
 cap = cv2.VideoCapture(video_path)
 
@@ -113,33 +113,33 @@ while ret:
             crop = cv2.flip(black_frame, -1)
 
             # Run the second model on the cropped frame for verification
-            verification_results = verify_model(crop)[0]
-            for verified_result in verification_results.boxes.data.tolist():
-                x_1,y_1,x_2,y_2,score_,class_id_ = verified_result
+            # verification_results = verify_model(crop)[0]
+            # for verified_result in verification_results.boxes.data.tolist():
+            #     x_1,y_1,x_2,y_2,score_,class_id_ = verified_result
 
-                if score_ > verification_confidence:
-                    detection_count += 1
-                    cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
-                    cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
-                    break
-
-            # verification_results = verify_model.predict(
-            #     source=crop,
-            #     conf=verification_confidence,
-            #     show=False,
-            #     verbose=False,
-            #     iou=0,
-            #     classes=[0],
-            #     augment=True,
-            #     imgsz=(640, 640)
-            # )
-
-            # if len(verification_results[0].boxes) > 0:
-            #     detection_count += 1
-            #     cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
-            #     cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
+            #     if score_ > verification_confidence:
+            #         detection_count += 1
+            #         cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
+            #         cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
             #                 cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+            #         break
+
+            verification_results = verify_model.predict(
+                source=crop,
+                conf=verification_confidence,
+                show=False,
+                verbose=False,
+                iou=0,
+                classes=[0],
+                augment=True,
+                imgsz=(640, 640)
+            )
+
+            if len(verification_results[0].boxes) > 0:
+                detection_count += 1
+                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
+                cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
 
     # for detection in processed_detections:
     #     mid_x, mid_y, area, class_id, confidence = detection
