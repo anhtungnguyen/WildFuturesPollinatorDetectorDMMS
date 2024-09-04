@@ -62,6 +62,7 @@ insect_iou_threshold = 0
 tracking_insect_classes = [0]
 frame_count = 0  # To keep track of the current frame number
 detection_counts = []  # List to store frame number and detection count
+black_pixel_threshold = 0.1
 
 while ret:
     frame_count += 1
@@ -98,48 +99,57 @@ while ret:
             # Crop the image for verification
             frame_width = frame.shape[1]
             frame_height = frame.shape[0]
-            x0_ = max(0, int(mid_x - 160))
-            y0_ = max(0, int(mid_y - 160))
-            x1_ = min(int(mid_x + 160), frame_width)
-            y1_ = min(int(mid_y + 160), frame_height)
 
-            cropped_frame = frame[y0_:y1_, x0_:x1_] 
+            insect_image = frame[max(mid_y-50,1):min(mid_y+50,frame_height-1), max(mid_x-50,1):min(mid_x+50,frame_width-1)]
+            # Calculate black pixels in the image
+            black_pixels = np.sum(insect_image == 0)
 
-            # Create a black frame and place the cropped frame in the center
-            black_frame = np.zeros((640, 640, 3), np.uint8)
-            black_frame[100:100+cropped_frame.shape[0], 100:100+cropped_frame.shape[1]] = cropped_frame
+            # Calculate the percentage of black pixels in the image
+            black_pixel_percentage = black_pixels / (insect_image.shape[0]*insect_image.shape[1])
 
-            # Flip the cropped frame (as per your original instructions)
-            crop = cv2.flip(black_frame, -1)
+            if black_pixel_percentage < black_pixel_threshold:
+                x0_ = max(0, int(mid_x - 160))
+                y0_ = max(0, int(mid_y - 160))
+                x1_ = min(int(mid_x + 160), frame_width)
+                y1_ = min(int(mid_y + 160), frame_height)
 
-            # Run the second model on the cropped frame for verification
-            # verification_results = verify_model(crop)[0]
-            # for verified_result in verification_results.boxes.data.tolist():
-            #     x_1,y_1,x_2,y_2,score_,class_id_ = verified_result
+                cropped_frame = frame[y0_:y1_, x0_:x1_] 
 
-            #     if score_ > verification_confidence:
-            #         detection_count += 1
-            #         cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
-            #         cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
-            #                 cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
-            #         break
+                # Create a black frame and place the cropped frame in the center
+                black_frame = np.zeros((640, 640, 3), np.uint8)
+                black_frame[100:100+cropped_frame.shape[0], 100:100+cropped_frame.shape[1]] = cropped_frame
 
-            verification_results = verify_model.predict(
-                source=crop,
-                conf=verification_confidence,
-                show=False,
-                verbose=False,
-                iou=0,
-                classes=[0],
-                augment=True,
-                imgsz=(640, 640)
-            )
+                # Flip the cropped frame (as per your original instructions)
+                crop = cv2.flip(black_frame, -1)
 
-            if len(verification_results[0].boxes) > 0:
-                detection_count += 1
-                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
-                cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+                # Run the second model on the cropped frame for verification
+                # verification_results = verify_model(crop)[0]
+                # for verified_result in verification_results.boxes.data.tolist():
+                #     x_1,y_1,x_2,y_2,score_,class_id_ = verified_result
+
+                #     if score_ > verification_confidence:
+                #         detection_count += 1
+                #         cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
+                #         cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
+                #                 cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+                #         break
+
+                verification_results = verify_model.predict(
+                    source=crop,
+                    conf=verification_confidence,
+                    show=False,
+                    verbose=False,
+                    iou=0,
+                    classes=[0],
+                    augment=True,
+                    imgsz=(640, 640)
+                )
+
+                if len(verification_results[0].boxes) > 0:
+                    detection_count += 1
+                    cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
+                    cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
 
     # for detection in processed_detections:
     #     mid_x, mid_y, area, class_id, confidence = detection

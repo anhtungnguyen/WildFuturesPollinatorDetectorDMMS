@@ -53,7 +53,7 @@ H, W, _ = frame.shape
 out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'MP4V'), int(cap.get(cv2.CAP_PROP_FPS)), (W, H))
 
 
-model = YOLO(weights_path)
+insect_model = YOLO(weights_path)
 flower_model = YOLO(flower_weight_path)
 
 threshold = 0.1
