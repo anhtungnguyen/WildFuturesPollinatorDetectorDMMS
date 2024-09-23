@@ -25,7 +25,7 @@ for video_name in os.listdir(video_folder_path):
                 break
             
             # Save every 10th frame
-            if frame_count % 2 == 0:
+            if frame_count % 1 == 0:
 
                 # rotated_frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
                 image_name = f"{os.path.splitext(video_name)[0]}_frame{image_count}.jpg"
