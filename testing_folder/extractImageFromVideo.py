@@ -8,7 +8,7 @@ output_image_path = '../data/input/images'
 
 # Ensure the output directory exists
 os.makedirs(output_image_path, exist_ok=True)
-
+# abcxyz
 # Iterate over each video in the folder
 for video_name in os.listdir(video_folder_path):
 

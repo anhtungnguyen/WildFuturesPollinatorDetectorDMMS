@@ -183,9 +183,9 @@ import numpy as np
 # weights_path = '../data/yolov8_models/insects_best_s.pt'
 weights_path = '../data/yolov8_models/detection.pt'
 
-video_path = '../data/input/20191123_131057.mp4'
-video_path_out = '../data/output/20191123_131057_out.mp4'
-csv_output_path = '../data/output/20191123_131057_detection_counts.csv'  # CSV file path for output
+video_path = '../data/input/20191123_130028.mp4'
+video_path_out = '../data/output/20191123_130028_out.mp4'
+csv_output_path = '../data/output/20191123_130028_detection_counts.csv'  # CSV file path for output
 
 cap = cv2.VideoCapture(video_path)
 
