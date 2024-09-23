@@ -41,9 +41,9 @@ def __calculate_cog(_results: np.ndarray) -> np.ndarray:
 weights_path = '../data/yolov8_models/insects_best_s.pt'
 verify_weights_paths = '../data/yolov8_models/insects_best_l.pt'
 
-video_path = '../data/input/20191123_131057.mp4'
-video_path_out = '../data/output/20191123_131057_out.mp4'
-csv_output_path = '../data/output/20191123_131057_detection_counts.csv'  # CSV file path for output
+video_path = '../data/input/20191123_130028.mp4'
+video_path_out = '../data/output/20191123_130028_out.mp4'
+csv_output_path = '../data/output/20191123_130028_detection_counts.csv'  # CSV file path for output
 
 cap = cv2.VideoCapture(video_path)
 
@@ -56,8 +56,8 @@ out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'MP4V'), int(cap.g
 model = YOLO(weights_path)
 verification_model = YOLO(verify_weights_paths)
 
-dl_detection_confidence = 0.5
-verification_confidence = 0.5
+dl_detection_confidence = 0.2
+verification_confidence = 0.2
 insect_iou_threshold = 0
 tracking_insect_classes = [0]
 frame_count = 0  # To keep track of the current frame number
