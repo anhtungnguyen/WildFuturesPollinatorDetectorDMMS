@@ -38,12 +38,12 @@
 
 #     return _insect_detection
 
-# weights_path = '../data/yolov8_models/insects_best_s.pt'
-# verify_weights_paths = '../data/yolov8_models/insects_best_l.pt'
+# weights_path = '../data/yolov8_models/detection.pt'
+# verify_weights_paths = '../data/yolov8_models/classification.pt'
 
-# video_path = '../data/input/20191123_131057.mp4'
+# video_path = '../data/input/videos/20191123_131057.mp4'
 # video_path_out = '../data/output/20191123_131057_out.mp4'
-# csv_output_path = '../data/output/20191123_131057_detection_counts.csv'  # CSV file path for output
+# # csv_output_path = '../data/output/20191123_131057_detection_counts.csv'  # CSV file path for output
 
 # cap = cv2.VideoCapture(video_path)
 
@@ -145,17 +145,17 @@
 #                 # label = f"{model.names[int(class_id)].upper()} {confidence:.2f}"
 #                 cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
 
-#     # Append the frame number and detection count to the list
-#     detection_counts.append([frame_count, detection_count])
+#     # # Append the frame number and detection count to the list
+#     # detection_counts.append([frame_count, detection_count])
 
-#     # Write to CSV file every 10 frames
-#     if frame_count % 10 == 0:
-#         with open(csv_output_path, mode='a', newline='') as file:
-#             writer = csv.writer(file)
-#             if frame_count == 10:  # Write the header only once
-#                 writer.writerow(['Frame Number', 'Detection Count'])
-#             writer.writerows(detection_counts)
-#         detection_counts = []  # Clear the list after writing to the file
+#     # # Write to CSV file every 10 frames
+#     # if frame_count % 10 == 0:
+#     #     with open(csv_output_path, mode='a', newline='') as file:
+#     #         writer = csv.writer(file)
+#     #         if frame_count == 10:  # Write the header only once
+#     #             writer.writerow(['Frame Number', 'Detection Count'])
+#     #         writer.writerows(detection_counts)
+#     #     detection_counts = []  # Clear the list after writing to the file
 
 #     out.write(frame)
 #     ret, frame = cap.read()
@@ -179,13 +179,16 @@ from ultralytics import YOLO
 
 import cv2
 import numpy as np
+import copy
+from copy import deepcopy
 
 # weights_path = '../data/yolov8_models/insects_best_s.pt'
 weights_path = '../data/yolov8_models/detection.pt'
+classification_path = '../data/yolov8_models/classification.pt'
 
-video_path = '../data/input/20191123_130028.mp4'
-video_path_out = '../data/output/20191123_130028_out.mp4'
-csv_output_path = '../data/output/20191123_130028_detection_counts.csv'  # CSV file path for output
+video_path = '../data/input/videos/bcac-9b35-47c4-a6e8-70266b943558.mp4'
+video_path_out = '../data/output/bcac-9b35-47c4-a6e8-70266b943558_out.mp4'
+# csv_output_path = '../data/output/20191123_130028_detection_counts.csv'  # CSV file path for output
 
 cap = cv2.VideoCapture(video_path)
 
@@ -196,8 +199,10 @@ out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'MP4V'), int(cap.g
 
 
 model = YOLO(weights_path)
+classification_model = YOLO(classification_path)
 
-threshold = 0.2
+threshold = 0.1
+classification_threshold = 0.5
 frame_count = 0  # To keep track of the current frame number
 detection_counts = []  # List to store frame number and detection count
 
@@ -216,18 +221,53 @@ while ret:
             cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
             cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
                         cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+            
+############################################## CLASSIFICATION ###############################################
+            # # Crop the image around the detection (expand around the bounding box to 320x320)
+            # x_center = int((x1 + x2) / 2)
+            # y_center = int((y1 + y2) / 2)
+            # half_size = 320  # Half of 320px
 
-    # Append the frame number and detection count to the list
-    detection_counts.append([frame_count, detection_count])
+            # # Ensure crop area is within the image boundaries
+            # x_start = max(0, x_center - half_size)
+            # y_start = max(0, y_center - half_size)
+            # x_end = min(W, x_center + half_size)
+            # y_end = min(H, y_center + half_size)
 
-    # Write to CSV file every 10 frames
-    if frame_count % 10 == 0:
-        with open(csv_output_path, mode='a', newline='') as file:
-            writer = csv.writer(file)
-            if frame_count == 10:  # Write the header only once
-                writer.writerow(['Frame Number', 'Detection Count'])
-            writer.writerows(detection_counts)
-        detection_counts = []  # Clear the list after writing to the file
+            # # Crop the image
+            # cropped_img = frame[y_start:y_end, x_start:x_end]
+
+            # # Resize the cropped image to 320x320 for classification
+            # cropped_resized = cv2.resize(cropped_img, (640, 640))
+
+            # # Pass the cropped image through the classification model
+            # class_results = classification_model(cropped_resized)[0]
+            # names_dict = class_results.names 
+            # probs = class_results.probs
+
+            # # Get classification result and confidence
+            # # class_conf = class_results.probs.max()  # Max confidence
+            # # class_id = class_results.probs.argmax()  # Class ID with max confidence
+            # name = deepcopy(names_dict[probs.top1])
+
+            # # If classified as a bee with confidence > classification_threshold
+            # if probs.top1 > classification_threshold:
+            #     cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
+            #     # Annotate the frame with classification result
+            #     cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y2 + 30)), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 0, 255), 3, cv2.LINE_AA)
+############################################## CLASSIFICATION ###############################################
+
+    # # Append the frame number and detection count to the list
+    # detection_counts.append([frame_count, detection_count])
+
+    # # Write to CSV file every 10 frames
+    # if frame_count % 10 == 0:
+    #     with open(csv_output_path, mode='a', newline='') as file:
+    #         writer = csv.writer(file)
+    #         if frame_count == 10:  # Write the header only once
+    #             writer.writerow(['Frame Number', 'Detection Count'])
+    #         writer.writerows(detection_counts)
+    #     detection_counts = []  # Clear the list after writing to the file
 
     out.write(frame)
     ret, frame = cap.read()
@@ -237,7 +277,84 @@ out.release()
 cv2.destroyAllWindows()
 
 # Write any remaining detection counts to the CSV file after the loop ends
-if detection_counts:
-    with open(csv_output_path, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerows(detection_counts)
+# if detection_counts:
+#     with open(csv_output_path, mode='a', newline='') as file:
+#         writer = csv.writer(file)
+#         writer.writerows(detection_counts)
+
+
+# import os
+# import csv  # Import CSV module to write to CSV files
+# from ultralytics import YOLO
+# import cv2
+# import numpy as np
+
+# # Paths to input and output directories
+# weights_path = '../data/yolov8_models/detection.pt'
+# image_folder_path = '../data/input/fake_data'  # Folder containing input images
+# output_image_folder = '../data/output/detect_results'  # Folder to save annotated images
+# csv_output_path = '../data/output/detection_counts.csv'  # CSV file path for output
+
+# # Create output folder if it doesn't exist
+# os.makedirs(output_image_folder, exist_ok=True)
+
+# # Load YOLOv8 model
+# model = YOLO(weights_path)
+
+# # Threshold for object detection
+# threshold = 0.2
+
+# # Initialize image count and detection counts
+# image_count = 0  # To keep track of the current image number
+# detection_counts = []  # List to store image name and detection count
+
+# # Get list of all image files in the folder
+# image_files = [f for f in os.listdir(image_folder_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
+
+# # Process each image
+# for image_name in image_files:
+#     # Read the image
+#     image_path = os.path.join(image_folder_path, image_name)
+#     image = cv2.imread(image_path)
+
+#     image_count += 1
+
+#     # Run the model on the image
+#     results = model(image)[0]
+
+#     detection_count = 0  # Counter for the number of detections in the current image
+
+#     # Process each detection result
+#     for result in results.boxes.data.tolist():
+#         x1, y1, x2, y2, score, class_id = result
+
+#         if score > threshold:
+#             detection_count += 1
+#             # Draw bounding box and label on the image
+#             cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
+#             cv2.putText(image, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
+#                         cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
+
+#     # Save the annotated image to the output folder
+#     output_image_path = os.path.join(output_image_folder, f"annotated_{image_name}")
+#     cv2.imwrite(output_image_path, image)
+
+#     # Append the image name and detection count to the list
+#     detection_counts.append([image_name, detection_count])
+
+#     # Write to CSV file every 10 images
+#     if image_count % 10 == 0:
+#         with open(csv_output_path, mode='a', newline='') as file:
+#             writer = csv.writer(file)
+#             if image_count == 10:  # Write the header only once
+#                 writer.writerow(['Image Name', 'Detection Count'])
+#             writer.writerows(detection_counts)
+#         detection_counts = []  # Clear the list after writing to the file
+
+# # Write any remaining detection counts to the CSV file after all images are processed
+# if detection_counts:
+#     with open(csv_output_path, mode='a', newline='') as file:
+#         writer = csv.writer(file)
+#         writer.writerows(detection_counts)
+
+# print("Processing complete. Annotated images saved to:", output_image_folder)

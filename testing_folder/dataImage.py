@@ -4,38 +4,47 @@ import random
 import numpy as np
 
 # Paths to environment and bee images
-env_img_path = "path_to_environment_images"
-bee_img_path = "path_to_bee_images"
-output_img_path = "path_to_output_images"
-output_label_path = "path_to_output_labels"
+env_img_path = "../data/input/flowers_images"
+bee_img_path = "../data/input/bees"
+output_img_path = "../data/input/fake_data"
+output_label_path = "../data/input/fake_labels"
 
-# Function to overlay bee on environment image at a random position
+# Function to overlay a resized bee (32x32) on the environment image at a random position
 def overlay_bee(env_img, bee_img, position):
-    y1, y2 = position[1], position[1] + bee_img.shape[0]
-    x1, x2 = position[0], position[0] + bee_img.shape[1]
+    # Resize bee image to 32x32 pixels
+    bee_img_resized = cv2.resize(bee_img, (64, 64))
+    
+    y1, y2 = position[1], position[1] + bee_img_resized.shape[0]
+    x1, x2 = position[0], position[0] + bee_img_resized.shape[1]
 
     # Check boundaries
     if y2 > env_img.shape[0] or x2 > env_img.shape[1]:
         return env_img, None
 
-    alpha_s = bee_img[:, :, 3] / 255.0
-    alpha_l = 1.0 - alpha_s
+    # Check if the bee image has an alpha channel
+    if bee_img_resized.shape[2] == 4:
+        # Use alpha channel for blending
+        alpha_s = bee_img_resized[:, :, 3] / 255.0
+        alpha_l = 1.0 - alpha_s
 
-    for c in range(0, 3):
-        env_img[y1:y2, x1:x2, c] = (alpha_s * bee_img[:, :, c] +
-                                    alpha_l * env_img[y1:y2, x1:x2, c])
+        for c in range(0, 3):
+            env_img[y1:y2, x1:x2, c] = (alpha_s * bee_img_resized[:, :, c] +
+                                        alpha_l * env_img[y1:y2, x1:x2, c])
+    else:
+        # If no alpha channel, simply overlay the image without transparency
+        env_img[y1:y2, x1:x2] = bee_img_resized
 
     # Calculate YOLOv8 bounding box
     x_center = (x1 + x2) / 2 / env_img.shape[1]
     y_center = (y1 + y2) / 2 / env_img.shape[0]
-    width = bee_img.shape[1] / env_img.shape[1]
-    height = bee_img.shape[0] / env_img.shape[0]
+    width = bee_img_resized.shape[1] / env_img.shape[1]
+    height = bee_img_resized.shape[0] / env_img.shape[0]
 
     return env_img, [x_center, y_center, width, height]
 
 # Get all environment and bee images
 env_images = [f for f in os.listdir(env_img_path) if f.endswith(".jpg")]
-bee_images = [f for f in os.listdir(bee_img_path) if f.endswith(".png")]
+bee_images = [f for f in os.listdir(bee_img_path) if f.endswith(".jpg")]
 
 # Process each environment image
 for env_img_name in env_images:
@@ -49,13 +58,9 @@ for env_img_name in env_images:
         bee_img_name = random.choice(bee_images)
         bee_img = cv2.imread(os.path.join(bee_img_path, bee_img_name), cv2.IMREAD_UNCHANGED)
 
-        # Resize bee image randomly
-        scale = random.uniform(0.1, 0.5)
-        bee_img = cv2.resize(bee_img, (0, 0), fx=scale, fy=scale)
-
         # Random position
-        x_offset = random.randint(0, env_img.shape[1] - bee_img.shape[1])
-        y_offset = random.randint(0, env_img.shape[0] - bee_img.shape[0])
+        x_offset = random.randint(0, env_img.shape[1] - 32)  # 32 = bee image width
+        y_offset = random.randint(0, env_img.shape[0] - 32)  # 32 = bee image height
 
         # Overlay bee on environment image
         env_img, bbox = overlay_bee(env_img, bee_img, (x_offset, y_offset))
