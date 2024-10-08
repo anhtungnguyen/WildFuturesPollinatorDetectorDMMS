@@ -180,8 +180,8 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 
-# weights_path = '../data/yolov8_models/insects_best_s.pt'
-weights_path = '../data/yolov8_models/detection.pt'
+weights_path = '../data/yolov8_models/insects_best_s.pt'
+# weights_path = '../data/yolov8_models/detection.pt'
 
 video_path = '../data/input/20191123_130028.mp4'
 video_path_out = '../data/output/20191123_130028_out.mp4'
