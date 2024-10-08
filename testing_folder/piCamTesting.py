@@ -50,11 +50,23 @@ import cv2
 import time
 from libcamera import ColorSpace
 import os
+from datetime import datetime
 
-output_file = "output_video.mp4"
+# Define output dirs
+output_dir = "vids"
 
-if os.path.exists(output_file):
-    os.remove(output_file)
+# Create the output file if it doesnt exist
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+# Generate a unique file name based on the current time
+current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+output_file = os.path.join(output_dir, f"output_video_{current_time}.mp4")
+
+# output_file = "output_video.mp4"
+
+# if os.path.exists(output_file):
+#     os.remove(output_file)
 
 # Initialize Picamera2
 picam2 = Picamera2()
@@ -64,8 +76,8 @@ config = picam2.create_preview_configuration(main={"size": (1600, 900)})
 picam2.configure(config)
 
 pipeline = (
-    'appsrc ! videoconvert ! video/x-raw,format=I420 ! x264enc '
-    '! h264parse ! mp4mux ! filesink location=outputvideo.mp4'
+    f'appsrc ! videoconvert ! video/x-raw,format=I420 ! x264enc '
+    f'! h264parse ! mp4mux ! filesink location={output_file}'
 )
 
 # output_file = "record_vid.mp4"
@@ -73,17 +85,21 @@ pipeline = (
 
 out = cv2.VideoWriter(pipeline, cv2.CAP_GSTREAMER, 0, 30, (1600, 900))
 
+# Define recording parameters
+frame_rate = 30         # Frame per second
+total_seconds = 60    # Total duration in second (1 hour)
+total_frame = frame_rate * total_seconds    # Total frames to write
+
 # Start the camera
 picam2.start()
 
-start_time = time.monotonic()
-duration = 900
+frame_count = 0
 
 # Allow some time for the camera to adjust to the lighting condition
 # time.sleep(2)
 
 
-while time.monotonic() - start_time < duration:
+while frame_count - total_frame:
     frame = picam2.capture_array()
 
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
@@ -92,8 +108,10 @@ while time.monotonic() - start_time < duration:
     # Display the live camera feed
     # cv2.imshow("Live Cam Feed", frame)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    frame_count += 1
+
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #     break
 
 out.release()
 # cv2.destroyAllWindows()
