@@ -175,10 +175,14 @@ import os
 import time
 import csv  # Import CSV module to write to CSV files
 
-from ultralytics import YOLO
+# from ultralytics import YOLO
 
 import cv2
 import numpy as np
+import hailo_platform
+
+net = hailo_platform.HEF('../data/yolov8_models/bee_dt.hef')
+print(dir(net))
 
 weights_path = '../data/yolov8_models/insects_best_s.pt'
 # weights_path = '../data/yolov8_models/detection.pt'
@@ -195,7 +199,7 @@ H, W, _ = frame.shape
 out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'MP4V'), int(cap.get(cv2.CAP_PROP_FPS)), (W, H))
 
 
-model = YOLO(weights_path)
+# model = YOLO(weights_path)
 
 threshold = 0.2
 frame_count = 0  # To keep track of the current frame number
@@ -204,7 +208,8 @@ detection_counts = []  # List to store frame number and detection count
 while ret:
     frame_count += 1
 
-    results = model(frame)[0]
+    # results = model(frame)[0]
+    results = net.infer(frame)
 
     detection_count = 0  # Counter for the number of detections in the current frame
 

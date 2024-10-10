@@ -51,6 +51,37 @@ import time
 from libcamera import ColorSpace
 import os
 from datetime import datetime
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def send_email_notification():
+    # Email configuration
+    sender_email = "tungnguyen68mufc@gmail.com"
+    receiver_email = "anhtungnguyen1809@gmail.com"
+    password = "ichk ydiq alcv govd"
+
+    subject = "Raspberry Pi Notification - Video Recording Completed"
+    body = "DONE RECORDING"
+
+    # Create the email message
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        # Connect to Gmail's SMTP server
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, password)
+        text = msg.as_string()
+        server.sendmail(sender_email, receiver_email, text)
+        server.quit()
+        print("Email notification sent successfully.")
+    except Exception as e:
+        print(f"Failed to send email notification: {e}")
 
 # Define output dirs
 output_dir = "vids"
@@ -87,7 +118,7 @@ out = cv2.VideoWriter(pipeline, cv2.CAP_GSTREAMER, 0, 30, (1600, 900))
 
 # Define recording parameters
 frame_rate = 30         # Frame per second
-total_seconds = 60    # Total duration in second (1 hour)
+total_seconds = 3600    # Total duration in second (1 hour)
 total_frame = frame_rate * total_seconds    # Total frames to write
 
 # Start the camera
@@ -116,4 +147,4 @@ while frame_count - total_frame:
 out.release()
 # cv2.destroyAllWindows()
 picam2.stop()
-
+send_email_notification()
