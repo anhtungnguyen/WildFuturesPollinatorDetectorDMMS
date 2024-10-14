@@ -171,6 +171,7 @@
 #         writer.writerows(detection_counts)
 
 
+
 import os
 import time
 import csv  # Import CSV module to write to CSV files
@@ -181,13 +182,30 @@ import cv2
 import numpy as np
 import copy
 from copy import deepcopy
+import math
+
+# Function to check if a bee is on a flower for at least 1 second
+def is_bee_on_flower(bees, flowers, frame_threshold=30):
+    valid_bees = []
+    for bee in bees:
+        bee_x, bee_y, _, _, _,_ = bee
+        for flower in flowers:
+            flower_x, flower_y, flower_radius, _, _ = flower
+            distance = math.sqrt((bee_x - flower_x)**2 + (bee_y - flower_y)**2)
+            if distance <= flower_radius:
+                bee[5] += 1  # Increment the frame count for this bee on this flower
+                if bee[5] >= frame_threshold:
+                    valid_bees.append(bee)
+                break
+    return valid_bees
 
 # weights_path = '../data/yolov8_models/insects_best_s.pt'
-weights_path = '../data/yolov8_models/detection.pt'
-classification_path = '../data/yolov8_models/classification.pt'
+weights_path = '../data/yolov8_models/lastest_bee.pt'
+classification_path = '../data/yolov8_models/classification_new.pt'
+flower_path = '../data/yolov8_models/pollen_jock_flowers.pt'
 
-video_path = '../data/input/videos/bcac-9b35-47c4-a6e8-70266b943558.mp4'
-video_path_out = '../data/output/bcac-9b35-47c4-a6e8-70266b943558_out.mp4'
+video_path = '../data/input/videos/20241001_120405.mp4'
+video_path_out = '../data/output/20241001_120405_out_only_bee.mp4'
 # csv_output_path = '../data/output/20191123_130028_detection_counts.csv'  # CSV file path for output
 
 cap = cv2.VideoCapture(video_path)
@@ -200,16 +218,22 @@ out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'MP4V'), int(cap.g
 
 model = YOLO(weights_path)
 classification_model = YOLO(classification_path)
+flower_model = YOLO(flower_path)
 
-threshold = 0.1
+threshold = 0.5
 classification_threshold = 0.5
 frame_count = 0  # To keep track of the current frame number
 detection_counts = []  # List to store frame number and detection count
+
+tracked_bees = []  # Store bee detections and their associated frame counts
+tracked_flower = []
 
 while ret:
     frame_count += 1
 
     results = model(frame)[0]
+
+    # flower_results = flower_model(frame)[0]
 
     detection_count = 0  # Counter for the number of detections in the current frame
 
