@@ -333,13 +333,9 @@ frame_threshold = config['frame_threshold']
 max_distance = config['max_distance']
 bee_threshold = config['bee_threshold']
 flower_threshold = config['flower_threshold']
+video_path = config['input_path']
+video_path_out = config['output_path']
 
-
-weights_path = '../data/yolov8_models/lastest_bee.pt'
-flower_path = '../data/yolov8_models/pollen_jock_flowers.pt'
-
-video_path = '../data/input/videos/20241019_121551.mp4'
-video_path_out = '../data/output/20241019_121551_out_t.mp4'
 # csv_output_path = '../data/output/20191123_130028_detection_counts.csv'  # CSV file path for output
 
 cap = cv2.VideoCapture(video_path)
@@ -350,11 +346,10 @@ H, W, _ = frame.shape
 out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'MP4V'), int(cap.get(cv2.CAP_PROP_FPS)), (W, H))
 
 
-model = YOLO(weights_path)
-flower_model = YOLO(flower_path)
+model = YOLO(bee_model_path)
+flower_model = YOLO(flower_model_path)
 
 threshold = 0.5
-classification_threshold = 0.5
 frame_count = 0  # To keep track of the current frame number
 detection_counts = []  # List to store frame number and detection count
 
@@ -364,7 +359,7 @@ tracked_flower = []
 while ret:
     frame_count += 1
 
-    results = model(frame)[0]
+    bee_results = model(frame)[0]
 
     flower_results = flower_model(frame)[0]
 
@@ -372,10 +367,10 @@ while ret:
 
     detection_count = 0  # Counter for the number of detections in the current frame
 
-    for result in results.boxes.data.tolist():
+    for result in bee_results.boxes.data.tolist():
         x1, y1, x2, y2, score, class_id = result
 
-        if score > threshold:
+        if score > bee_threshold:
             mid_x = int((x1+x2)/2)
             mid_y = int((y1+y2)/2)
             area = int(abs((x1-x2) * (y1-y2)))
@@ -386,12 +381,12 @@ while ret:
             # cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
             #             cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
     
-    tracked_bees = update_tracked_bees(tracked_bees, new_tracked_bees)
+    tracked_bees = update_tracked_bees(tracked_bees, new_tracked_bees, max_distance)
 
     for result in flower_results.boxes.data.tolist():
         x1, y1, x2, y2, score, class_id = result
 
-        if score > threshold:
+        if score > flower_threshold:
             mid_x = int((x1+x2)/2)
             mid_y = int((y1+y2)/2)
             min_x = x1
@@ -413,7 +408,7 @@ while ret:
             cv2.putText(frame, flower_results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
                         cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
 
-    valid_bees = is_bee_on_flower(tracked_bees, tracked_flower)
+    valid_bees = is_bee_on_flower(tracked_bees, tracked_flower, frame_threshold)
 
     # Annotate valid bees
     for bee in valid_bees:
