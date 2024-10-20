@@ -1,0 +1,8 @@
+bee_model: '../data/yolov8_models/lastest_bee.pt'
+flower_model: '../data/yolov8_models/pollen_jock_flowers.pt'
+frame_threshold: 30
+max_distance: 50
+bee_threshold: 0.5
+flower_threshold: 0.5
+input_path: '../data/input/videos/20241019_121551.mp4'
+output_path: '../data/output/20241019_121551_out_t.mp4'

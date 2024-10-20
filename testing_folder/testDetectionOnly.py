@@ -184,28 +184,13 @@ import copy
 from copy import deepcopy
 import math
 
-# Function to check if a bee is on a flower for at least 1 second
-def is_bee_on_flower(bees, flowers, frame_threshold=30):
-    valid_bees = []
-    for bee in bees:
-        bee_x, bee_y, _, _, _,_ = bee
-        for flower in flowers:
-            flower_x, flower_y, flower_radius, _, _ = flower
-            distance = math.sqrt((bee_x - flower_x)**2 + (bee_y - flower_y)**2)
-            if distance <= flower_radius:
-                bee[5] += 1  # Increment the frame count for this bee on this flower
-                if bee[5] >= frame_threshold:
-                    valid_bees.append(bee)
-                break
-    return valid_bees
-
 # weights_path = '../data/yolov8_models/insects_best_s.pt'
 weights_path = '../data/yolov8_models/lastest_bee.pt'
 classification_path = '../data/yolov8_models/classification_new.pt'
 flower_path = '../data/yolov8_models/pollen_jock_flowers.pt'
 
-video_path = '../data/input/videos/20241001_120405.mp4'
-video_path_out = '../data/output/20241001_120405_out_only_bee.mp4'
+video_path = '../data/input/videos/20241019_121551.mp4'
+video_path_out = '../data/output/20241019_121551_out_only_bee.mp4'
 # csv_output_path = '../data/output/20191123_130028_detection_counts.csv'  # CSV file path for output
 
 cap = cv2.VideoCapture(video_path)
@@ -245,41 +230,6 @@ while ret:
             cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
             cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y1 - 10)),
                         cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
-            
-############################################## CLASSIFICATION ###############################################
-            # # Crop the image around the detection (expand around the bounding box to 320x320)
-            # x_center = int((x1 + x2) / 2)
-            # y_center = int((y1 + y2) / 2)
-            # half_size = 320  # Half of 320px
-
-            # # Ensure crop area is within the image boundaries
-            # x_start = max(0, x_center - half_size)
-            # y_start = max(0, y_center - half_size)
-            # x_end = min(W, x_center + half_size)
-            # y_end = min(H, y_center + half_size)
-
-            # # Crop the image
-            # cropped_img = frame[y_start:y_end, x_start:x_end]
-
-            # # Resize the cropped image to 320x320 for classification
-            # cropped_resized = cv2.resize(cropped_img, (640, 640))
-
-            # # Pass the cropped image through the classification model
-            # class_results = classification_model(cropped_resized)[0]
-            # names_dict = class_results.names 
-            # probs = class_results.probs
-
-            # # Get classification result and confidence
-            # # class_conf = class_results.probs.max()  # Max confidence
-            # # class_id = class_results.probs.argmax()  # Class ID with max confidence
-            # name = deepcopy(names_dict[probs.top1])
-
-            # # If classified as a bee with confidence > classification_threshold
-            # if probs.top1 > classification_threshold:
-            #     cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
-            #     # Annotate the frame with classification result
-            #     cv2.putText(frame, results.names[int(class_id)].upper(), (int(x1), int(y2 + 30)), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 0, 255), 3, cv2.LINE_AA)
-############################################## CLASSIFICATION ###############################################
 
     # # Append the frame number and detection count to the list
     # detection_counts.append([frame_count, detection_count])

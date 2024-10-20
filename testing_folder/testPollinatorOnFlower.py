@@ -277,6 +277,13 @@ import numpy as np
 import copy
 from copy import deepcopy
 import math
+import yaml
+
+# Load the config file
+def load_config(config_path='config.yaml'):
+    with open(config_path, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
 
 # Function to update tracked bees instead of resetting
 def update_tracked_bees(bees, new_bees, max_distance=50):
@@ -314,13 +321,25 @@ def is_bee_on_flower(bees, flowers, frame_threshold=30):
                 break
     return valid_bees
 
-# weights_path = '../data/yolov8_models/insects_best_s.pt'
+
+
+# Load the configuration
+config = load_config()
+
+# Extract the parameters from the config
+bee_model_path = config['bee_model']
+flower_model_path = config['flower_model']
+frame_threshold = config['frame_threshold']
+max_distance = config['max_distance']
+bee_threshold = config['bee_threshold']
+flower_threshold = config['flower_threshold']
+
+
 weights_path = '../data/yolov8_models/lastest_bee.pt'
-classification_path = '../data/yolov8_models/classification_new.pt'
 flower_path = '../data/yolov8_models/pollen_jock_flowers.pt'
 
-video_path = '../data/input/videos/20241001_120405.mp4'
-video_path_out = '../data/output/20241001_120405_out_t.mp4'
+video_path = '../data/input/videos/20241019_121551.mp4'
+video_path_out = '../data/output/20241019_121551_out_t.mp4'
 # csv_output_path = '../data/output/20191123_130028_detection_counts.csv'  # CSV file path for output
 
 cap = cv2.VideoCapture(video_path)
@@ -332,7 +351,6 @@ out = cv2.VideoWriter(video_path_out, cv2.VideoWriter_fourcc(*'MP4V'), int(cap.g
 
 
 model = YOLO(weights_path)
-classification_model = YOLO(classification_path)
 flower_model = YOLO(flower_path)
 
 threshold = 0.5
