@@ -111,3 +111,40 @@ sudo systemctl enable my_program.service
 ```
 sudo systemctl start my_program.service
 ```
+
+## Conversion from YOLOv8 .pt to HAILO .hef
+
+### Note: The primary guide was followed using wsl2.
+
+### What is this? 
+
+The HAILO Dataflow Compiler is a tool used to convert computer vision models from a variety of formats (YOLO versions, ResNet, Tensorflow, etc.) into a single format which can be read by HAILO hardware which is integrated on the Raspberry Pi AI Kit. It converts the model into an optimised format to run at as high a frame rate as possible. Note that this library can only be run on Linux software.
+
+### How to Use it? 
+The primary tutorial being followed is here. It describes downloading, installation and running of the DFC: 
+* [Tutorial of AI Kit with Raspberry Pi 5 about YOLOv8n object detection](https://wiki.seeedstudio.com/tutorial_of_ai_kit_with_raspberrypi5_about_yolov8n_object_detection/)
+
+  * It is recommended to not use the command line that this tutorial guide uses to convert the models to different file formats due to the clumsiness of the arguments provided and inexperience.
+  * Instead, after installing the Hailo DFC, navigate to the hailo/lib/python3.<version>/site-packages/hailo_tutorials/notebooks folder and work through tutorials 1-3 to produce a .hef file. Note that a .onnx file is needed before starting.
+
+* Importantly, successful running of the DFC depends on the computer having enough RAM.
+  * During my run of the DFC, RAM usage peaked at 26 GB.
+  * Recommended specs are 32 GB, and minimum is 16 GB (likely won’t cut it for complex YOLO models).
+
+* When asked to specify the end-nodes for the input .onnx model, refer to the hailo_model_zoo/hailo_model_zoo/cfg/networks folder and find the corresponding .yaml file for your starting pre-trained model, e.g. yolov8n.yaml
+  * Copy in the end-nodes in the .yaml folder.
+  * You must have downloaded the hailo model zoo for this.
+  * If you have custom-trained your own network from scratch, you may need to know your end-nodes yourself.
+* Each step is independently short, save for compilation. On the yolov8n model for bee detection this took up to 1 and a half hours when targeting maximum performance. 
+
+### How to get a .onnx file
+To obtain a .onnx file from a .pt file, run the following command using the ultralytics python library: 
+* yolo export model<model_name> imgsz=640 format=onnx opset=11
+
+### Troubleshooting links 
+Some useful community posts which were used in troubleshooting (login may be required): 
+* https://community.hailo.ai/t/unable-to-compile-quantized-har-file-to-hef-for-yolov8n-model/2672
+* https://community.hailo.ai/t/compilation-of-yolov8-network/2028/11
+* https://community.hailo.ai/t/how-to-install-the-hailo-dataflow-compiler-dfc-on-wsl2/2890
+
+ 
