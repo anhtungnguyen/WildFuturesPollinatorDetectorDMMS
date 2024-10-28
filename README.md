@@ -52,6 +52,26 @@ To edit configuration file, open the file config.yaml in WildFuturesPollinatorDe
 
 * output_path: output video source
 
+### Config the Pi to work with/without moniter
+* Open the configuration file using:
+```
+sudo nano /boot/config.txt
+```
+
+* Add or Modify the Following Lines:
+```
+hdmi_force_hotplug=1
+hdmi_group=2
+hdmi_mode=39
+```
+
+* Save and Exit: Press CTRL + X, then Y, and hit Enter to save the changes.
+
+* Reboot the Raspberry Pi:
+```
+sudo reboot
+```
+
 ### Run the program
 
 Navigate to the repo
@@ -73,6 +93,11 @@ python3 testFlowerModel.py
 ##### Pollinated bee detection mode
 ```
 python3 testPollinatorOnFlower.py
+```
+
+#### Recording dataset only
+```
+python3 piCamTesting.py
 ```
 
 ### To set up Auto-Run program(s) on Boot
