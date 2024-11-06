@@ -82,29 +82,29 @@ python3 testPollinatorOnFlower.py
 To install Python on your Windows operating system, you can follow this [online guide](https://www.digitalocean.com/community/tutorials/install-python-windows-10).
 
 When this is complete, open a command prompt window and enter the following commands:
-'''
+```
 pip install ultralytics
-'''
-'''
+```
+```
 pip install opencv-python
-'''
+```
 
 Now, clone this git repository to your desired destination. You can do this by opening file explorer and navigating to your desired folder, copying the address as text from the address bar, and entering the following command in a command prompt window. Replace the address line below with the address of the folder you have chosen.
-'''
+```
 cd C:\Users\your_username\path\to\the\chosen_folder
-'''
+```
 Install git on your Windows PC by following this [guide](https://github.com/git-guides/install-git) for the Windows section. 
 Clone this git repo into the current directory by running this command:
-'''
+```
 git clone https://github.com/anhtungnguyen/WildFuturesPollinatorDetectorDMMS.git
-'''
+```
 
 You may set up the configuration of the AI detection models in the config.yaml file the same way as with the Linux OS detailed above. Ensure that the correct models are placed on the path you have chosen.
 
 With your open command prompt session (or in a newly opened window) in the folder you have cloned, navigate to the pollen_jock folder by using the command:
-'''
+```
 cd WildFuturesPollinatorDetectorDMMS/pollen_jock
-'''
+```
 You may now run any of the three detection modes below by running the associated command in the command prompt window. 
 
 ##### Bee detection only mode
