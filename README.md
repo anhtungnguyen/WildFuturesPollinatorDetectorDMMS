@@ -171,4 +171,3 @@ Example:
 - Big data integration with assumption of multiple structures so that an analysis of entire neighbourhoods or cities can be made
 Some of the features require a stronger workstation/access to cloud storage as it is unlikely a raspberry pi 5 with an AI kit is sufficient alone. 
 
-## procedure of operation
