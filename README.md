@@ -11,6 +11,8 @@ This also covers:
 - Future steps for scalability
 - Recommendations for improvements 
 
+We recommend that you download and install VSCode to run all of the below components. You can download an learn how to use VSCode at this [link](https://code.visualstudio.com/docs).
+
 ## Set up to run on Linux OS
 
 ### Installation and Dependencies:
@@ -139,6 +141,8 @@ python3 testPollinatorOnFlower.py
 | Pi cam module 3                 | https://core-electronics.com.au/raspberry-pi-camera-3.html                                           |
 | 3D printed parts                | N/A                                                                                                  |
 | Heatsink+Fan for Raspberry Pi 5 | https://raspberry.piaustralia.com.au/products/raspberry-pi-active-cooler?_pos=1&_sid=40905f3a8&_ss=r |
+| Raspberry Pi Mini Ribbon Cable  | https://raspberry.piaustralia.com.au/products/raspberry-pi-display-cable-standard-mini               |
+| Waterproof case                 | https://www.amazon.com.au/Wutusent-Dustproof-Waterproof-Universal-Electrical/dp/B0BZMC1MNG?th=1      |
 
 ## CAD files
 Included in the CAD files folder is both the solid works parts and the printable STL files. Currently it is designed to print with PLA but its recommended to use an alternate filament capable of withstanding the UV rays from the sun. 
