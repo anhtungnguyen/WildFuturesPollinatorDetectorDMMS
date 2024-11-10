@@ -11,7 +11,7 @@ This also covers:
 - Future steps for scalability
 - Recommendations for improvements 
 
-We recommend that you download and install VSCode to run all of the below components. You can download an learn how to use VSCode at this [link](https://code.visualstudio.com/docs).
+We recommend that you download and install VSCode to run all of the below components. You can download and learn how to use VSCode at this [link](https://code.visualstudio.com/docs).
 
 ## Set up to run on Linux OS
 
