@@ -9,6 +9,10 @@ data/input
 
 yolov8
 data/Ratnayake2023_processed/
-testing_folder/myenv
 myenv
-testing_folder/vids/
+Detector/myenv
+Detector/vids/
+Detector/imgs
+Detector/beeVids
+Detector/GoogleCloud/service-secrets.json
+Detector/csvs
