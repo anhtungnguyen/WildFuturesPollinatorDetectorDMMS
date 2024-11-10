@@ -194,11 +194,11 @@ def get_bb_frame(frame_in, bees, flowers, pollination_list):
                 label = f"{class_name} poll. {int(score*100)}%"
                 bb_frame = cv2.rectangle(bb_frame, (int((x0)), int((y0))), (int((x1)), int((y1))), (0, 0, 255, 125), 2)
                 bb_frame = cv2.putText(bb_frame, label, (int((x0)+5), int((y0)+15)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255, 125), 1, cv2.LINE_AA)
-            else: # Otherwise mark as green.
+            else: # Otherwise mark bee as blue.
                 label = f"{class_name} {int(score*100)}%"
-                bb_frame = cv2.rectangle(bb_frame, (int((x0)), int((y0))), (int((x1)), int((y1))), (0, 255, 0, 125), 2)
+                bb_frame = cv2.rectangle(bb_frame, (int((x0)), int((y0))), (int((x1)), int((y1))), (255, 0, 0, 125), 2)
                 bb_frame = cv2.putText(bb_frame, label, (int((x0)+5), int((y0)+15)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0, 125), 1, cv2.LINE_AA)
-        for class_name, bbox, score in flowers:
+        for class_name, bbox, score in flowers: # Mark flowers as green.
             x0, y0, x1, y1 = bbox
             label = f"{class_name} {int(score*100)}%"
             bb_frame = cv2.rectangle(bb_frame, (int((x0)), int((y0))), (int((x1)), int((y1))), (0, 255, 0, 125), 2)
