@@ -1,5 +1,7 @@
 # WildFuturesPollinatorDetectorDMMS
 
+### Note: If you only want the files necessary for running the system on the Raspberry Pi, use the pi_clean branch instead of the main branch.
+
 ## Introduction
 
 WildFuturesPollinatorDetectorDMMS is designed to detect multiple bees in a "Wild Futures” house, monitoring their pollination behaviour. To achieve this, we use deep learning-based object detection for accurate detecting. This README will show you how to use the models to detect bees, flowers, and pollination events from pre-recorded videos.
