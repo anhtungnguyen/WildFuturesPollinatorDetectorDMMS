@@ -1,6 +1,6 @@
 # WildFuturesPollinatorDetectorDMMS
 
-### Note: If you only want the files necessary for running the system on the Raspberry Pi, use the pi_clean branch instead of the main branch.
+### Note: If you only want the files necessary for running the system on the Raspberry Pi, use the pi_clean branch instead of the main branch. The files located on the main branch are outdated. Follow the guide in the pi_clean branch to run the system. 
 
 ## Introduction
 
