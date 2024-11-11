@@ -146,6 +146,8 @@ python3 testPollinatorOnFlower.py
 | Raspberry Pi Mini Ribbon Cable  | https://raspberry.piaustralia.com.au/products/raspberry-pi-display-cable-standard-mini               |
 | Waterproof case                 | https://www.amazon.com.au/Wutusent-Dustproof-Waterproof-Universal-Electrical/dp/B0BZMC1MNG?th=1      |
 
+This comes out to approximately $ 580 AUD at time of writing.
+
 ## CAD files
 Included in the CAD files folder is both the solid works parts and the printable STL files. Currently it is designed to print with PLA but its recommended to use an alternate filament capable of withstanding the UV rays from the sun. 
 
